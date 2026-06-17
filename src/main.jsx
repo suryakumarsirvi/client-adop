@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom/client';
 import App from './app/App';
 import './app/App.css';
-import ErrorBoundary from './errors/ErrorBoundary';
+import { ErrorBoundary } from './errors/ErrorBoundary';
 
 const container = document.getElementById('root');
 

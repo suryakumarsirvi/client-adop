@@ -15,7 +15,7 @@ export const handleQueryError = (error, query) => {
 };
 
 
-export const handleMutationError = (error, variables, context, mutation) => {
+export const handleMutationError = (error) => {
   logger.error(
     { module: "server-state", source: "query.error.js" },
     "Server state update (mutation) failed.",

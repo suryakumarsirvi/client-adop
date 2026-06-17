@@ -1,1 +1,72 @@
-@import 'tailwindcss';
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'PrimaryFont';
+  src: url('/fonts/primary.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'SecondaryFont';
+  src: url('/fonts/secondary.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrainFont';
+  src: url('/fonts/jetbrain.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: 'PrimaryFont', sans-serif;
+  --font-heading: 'SecondaryFont', sans-serif;
+  --font-mono: 'JetBrainFont', monospace;
+
+  --color-brand-primary: var(--dap-brand-primary);
+  --color-brand-secondary: var(--dap-brand-secondary);
+  --color-brand-accent: var(--dap-brand-accent);
+  --color-brand-bg: var(--dap-brand-bg);
+  --color-brand-card: var(--dap-brand-card);
+  --color-brand-text: var(--dap-brand-text);
+  --color-brand-border: var(--dap-brand-border);
+}
+
+:root {
+  /* Premium Minimalist Slate Palette */
+  --dap-brand-primary: #0891b2; /* cyan-600 */
+  --dap-brand-secondary: #0e7490; /* cyan-700 */
+  --dap-brand-accent: #06b6d4; /* cyan-500 */
+  --dap-brand-bg: #f8fafc; /* slate-50 */
+  --dap-brand-card: #ffffff; /* white */
+  --dap-brand-text: #0f172a; /* slate-900 */
+  --dap-brand-border: #e2e8f0; /* slate-200 */
+}
+
+:root.dark {
+  --dap-brand-primary: #06b6d4; /* cyan-500 */
+  --dap-brand-secondary: #22d3ee; /* cyan-400 */
+  --dap-brand-accent: #67e8f9; /* cyan-300 */
+  --dap-brand-bg: #020617; /* slate-950 */
+  --dap-brand-card: #0f172a; /* slate-900 */
+  --dap-brand-text: #f8fafc; /* slate-50 */
+  --dap-brand-border: #1e293b; /* slate-800 */
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}

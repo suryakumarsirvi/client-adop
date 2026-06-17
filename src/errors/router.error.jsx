@@ -1,4 +1,3 @@
-import React from "react";
 import { useRouteError, isRouteErrorResponse } from "react-router";
 import { logger } from "@/utils/logger";
 

@@ -1,51 +1,67 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useEffect, useState } from 'react';
 
 const ThemeContext = createContext(null);
 
-const applyTheme = (theme) => {
+const applyBaseMode = (mode) => {
   document.documentElement.classList.toggle(
     'dark',
-    theme === 'dark'
+    mode === 'dark'
   );
-
-  localStorage.setItem('theme', theme);
+  localStorage.setItem('theme', mode);
 };
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState('light');
+  const [mode, setMode] = useState(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme) return savedTheme;
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return prefersDark ? 'dark' : 'light';
+  });
+  const [tenantColors, setTenantColors] = useState(null);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
+    applyBaseMode(mode);
+  }, [mode]);
 
-    if (savedTheme) {
-      setTheme(savedTheme);
-      applyTheme(savedTheme);
+  // Update dynamic CSS variables for tenant branding
+  const applyTenantColors = (colors) => {
+    if (!colors) {
+      // Clear overridden colors, returning to CSS defaults
+      const root = document.documentElement;
+      const keysToClear = [
+        '--dap-brand-primary',
+        '--dap-brand-secondary',
+        '--dap-brand-accent',
+        '--dap-brand-bg',
+        '--dap-brand-card',
+        '--dap-brand-text',
+        '--dap-brand-border',
+      ];
+      keysToClear.forEach((key) => root.style.removeProperty(key));
+      setTenantColors(null);
       return;
     }
 
-    const prefersDark = window.matchMedia(
-      '(prefers-color-scheme: dark)'
-    ).matches;
+    const root = document.documentElement;
+    Object.entries(colors).forEach(([key, value]) => {
+      const propertyName = key.startsWith('--') ? key : `--dap-brand-${key}`;
+      root.style.setProperty(propertyName, value);
+    });
+    setTenantColors(colors);
+  };
 
-    const initialTheme = prefersDark ? 'dark' : 'light';
-
-    setTheme(initialTheme);
-    applyTheme(initialTheme);
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme =
-      theme === 'dark'
-        ? 'light'
-        : 'dark';
-
-    setTheme(nextTheme);
-    applyTheme(nextTheme);
+  const toggleMode = () => {
+    const nextMode = mode === 'dark' ? 'light' : 'dark';
+    setMode(nextMode);
+    applyBaseMode(nextMode);
   };
 
   const value = {
-    theme,
-    toggleTheme,
+    mode,
+    toggleMode,
+    tenantColors,
+    applyTenantColors,
   };
 
   return (
@@ -57,12 +73,8 @@ export function ThemeProvider({ children }) {
 
 export function useTheme() {
   const context = useContext(ThemeContext);
-
   if (!context) {
-    throw new Error(
-      'useTheme must be used within ThemeProvider'
-    );
+    throw new Error('useTheme must be used within ThemeProvider');
   }
-
   return context;
 }
