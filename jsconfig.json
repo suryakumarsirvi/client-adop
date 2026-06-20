@@ -2,7 +2,10 @@
   "compilerOptions": {
     "module": "ESNext",
     "moduleResolution": "Bundler",
-    "target": "ES2022"
+    "target": "ES2022",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
   "include": ["src", "src/errors"]
 }

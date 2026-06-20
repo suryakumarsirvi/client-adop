@@ -4,20 +4,21 @@ import { usePermission } from '@/context/PermissionProvider';
 import { saveLocalTenant } from '@/hooks/useTenant';
 import { toast } from 'sonner';
 import {
-  User,
-  Briefcase,
-  Mail,
-  Lock,
-  ShieldAlert,
   Rocket,
-  TrendingUp, 
+  TrendingUp,
   Crown,
   ArrowLeft,
   ArrowRight,
-  CheckCircle2
+  CheckCircle2,
 } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import { createTenant } from '@/api/tenant.api';
+import { cn } from '@/lib/utils';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
-// Plans catalog based on the Sequelize Schema parameters
 const PLANS_CATALOG = [
   {
     code: 'starter',
@@ -29,7 +30,7 @@ const PLANS_CATALOG = [
     mauLimit: 10000,
     flowLimit: 3,
     color: 'from-blue-500 to-cyan-500',
-    features: { analytics_dashboard: false, custom_css: false }
+    features: { analytics_dashboard: false, custom_css: false },
   },
   {
     code: 'growth',
@@ -41,7 +42,7 @@ const PLANS_CATALOG = [
     mauLimit: 50000,
     flowLimit: 10,
     color: 'from-brand-primary to-brand-secondary',
-    features: { analytics_dashboard: true, custom_css: false }
+    features: { analytics_dashboard: true, custom_css: false },
   },
   {
     code: 'enterprise_custom_v1',
@@ -53,12 +54,9 @@ const PLANS_CATALOG = [
     mauLimit: 500000,
     flowLimit: 99,
     color: 'from-purple-500 to-indigo-500',
-    features: { analytics_dashboard: true, custom_css: true }
-  }
+    features: { analytics_dashboard: true, custom_css: true },
+  },
 ];
-
-import { useMutation } from '@tanstack/react-query';
-import { createTenant } from '@/api/tenant.api';
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -95,7 +93,7 @@ export default function AuthPage() {
     mutationFn: createTenant,
     onSuccess: (data) => {
       console.log('API Response success:', data);
-      const selectedPlan = PLANS_CATALOG.find(p => p.code === selectedPlanCode);
+      const selectedPlan = PLANS_CATALOG.find((p) => p.code === selectedPlanCode);
       const tenantSlug = data.tenant?.slug || data.slug;
 
       if (tenantSlug) {
@@ -122,7 +120,7 @@ export default function AuthPage() {
       toast.error(`Backend API Error: ${error.message}`);
 
       // Offline fallback
-      const selectedPlan = PLANS_CATALOG.find(p => p.code === selectedPlanCode);
+      const selectedPlan = PLANS_CATALOG.find((p) => p.code === selectedPlanCode);
       const fallbackSlug = companyName
         .toLowerCase()
         .replace(/[^a-z0-9 -]/g, '')
@@ -142,7 +140,7 @@ export default function AuthPage() {
       setTimeout(() => {
         window.location.href = `http://${fallbackSlug}.localhost:5173/dashboard`;
       }, 2000);
-    }
+    },
   });
 
   const isLoading = registerMutation.isPending;
@@ -156,7 +154,7 @@ export default function AuthPage() {
         companyName,
         email,
         password,
-        planCode: selectedPlanCode
+        planCode: selectedPlanCode,
       });
     } else {
       if (!email || !password) {
@@ -173,266 +171,307 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-brand-bg text-brand-text p-4 transition-colors duration-300 antialiased font-sans">
-      <div className={`w-full ${isRegister && step === 2 ? 'max-w-4xl' : 'max-w-lg'} bg-brand-card border border-brand-border rounded-xl p-8 shadow-xl transition-all duration-300`}>
-
-        {isRegister && (
-          <div className="flex items-center justify-center gap-4 mb-6 text-xs font-semibold text-zinc-400">
-            <span className={`px-2.5 py-1 rounded-full ${step === 1 ? 'bg-brand-primary text-white' : 'bg-brand-primary/10 text-brand-primary'}`}>
-              1. Account Info
-            </span>
-            <div className="h-[1px] w-8 bg-brand-border" />
-            <span className={`px-2.5 py-1 rounded-full ${step === 2 ? 'bg-brand-primary text-white' : 'bg-brand-border text-zinc-400'}`}>
-              2. Plan Selection
-            </span>
-          </div>
-        )}
-
-        <div className="text-center mb-6">
-          <h2 className="font-heading text-3xl font-semibold tracking-tight leading-none">
-            {isRegister
-              ? (step === 1 ? 'Create an Account' : 'Choose Your Subscription Plan')
-              : 'Welcome Back'}
-          </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-2">
-            {isRegister
-              ? (step === 1 ? 'Provide organisation credentials to set up a tenant.' : 'Choose the configuration matches your workflow size.')
-              : 'Enter credentials to access your workspace.'}
+    <div className="min-h-screen flex flex-col md:flex-row bg-background">
+      {step !== 2 && <div className="flex-1 bg-muted/20 p-8 md:p-12 flex flex-col justify-between min-h-[300px] md:min-h-screen order-2 md:order-1">
+        <div>
+          <h1 className="text-3xl md:text-6xl font-light tracking-tight text-foreground">
+            {isRegister ? (step === 1 ? "Let's get started." : 'Almost there.') : 'Welcome back.'}
+          </h1>
+          <p className="text-muted-foreground text-lg mt-2">
+            {isRegister ? 'Create your workspace in minutes.' : 'Sign in to access your workspace.'}
           </p>
         </div>
 
-        {(!isRegister || step === 1) && (
-          <form onSubmit={isRegister ? handleProceedToPlans : handleAuthSubmit} className="flex flex-col gap-4">
+        <div className="space-y-6 flex justify-between">
+          <div>
+            <a href="mailto:hello@webtour.dev" className="text-muted-foreground hover:text-primary transition-colors text-lg">
+              hello@webtour.dev
+            </a>
+            <div className="flex gap-4 mt-2">
+              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <i className="h-5 w-5 ri-facebook-circle-fill"></i>
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <i className="h-5 w-5 ri-instagram-fill"></i>
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <i className="h-5 w-5 ri-behance-fill"></i>
+              </a>
+              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <i className="h-5 w-5 ri-linkedin-box-fill"></i>
+              </a>
+            </div>
+          </div>
+          <div className="text-sm text-muted-foreground space-y-1">
+            <p>San Francisco, CA</p>
+            <p>+1 (555) 123-4567</p>
+          </div>
+        </div>
+      </div>}
 
-            {isRegister && (
-              <>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Full Name</label>
-                  <div className="relative">
-                    <User className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
-                    <input
-                      type="text"
-                      placeholder="Enter your name"
-                      required
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-brand-border bg-brand-bg text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary/30 text-sm font-medium transition"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Company / Organisation Name</label>
-                  <div className="relative">
-                    <Briefcase className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
-                    <input
-                      type="text"
-                      placeholder="Your company's name"
-                      required
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-brand-border bg-brand-bg text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary/30 text-sm font-medium transition"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
-                <input
+      <div className="flex-1 p-8 md:p-12 flex flex-col justify-center order-1 md:order-2">
+        {/* Login Form */}
+        {!isRegister && (
+          <div className="max-w-sm w-full mx-auto">
+            <h2 className="text-4xl font-light tracking-tight mb-6">Sign in</h2>
+            <form onSubmit={handleAuthSubmit} className="space-y-5">
+              <div className="space-y-1">
+                <Label htmlFor="email" className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                  Email Address
+                </Label>
+                <Input
+                  id="email"
                   type="email"
                   placeholder="name@company.com"
-                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-brand-border bg-brand-bg text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary/30 text-sm font-medium transition"
+                  className="border-0 border-b-2 rounded-none p-2 h-auto shadow-none focus-visible:ring-0 focus-visible:border-primary transition-colors"
+                  required
                 />
               </div>
-            </div>
-            {!isRegister && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-brand-border bg-brand-bg text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary/30 text-sm font-medium transition"
-                  />
-                </div>
-              </div>)}
-
-
-            {isRegister && (
-              <div className='w-full flex gap-4'>
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Password</label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-brand-border bg-brand-bg text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary/30 text-sm font-medium transition"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Confirm Password</label>
-                  <div className="relative">
-                    <ShieldAlert className="absolute left-3.5 top-3.5 w-4 h-4 text-zinc-400" />
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      required
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full pl-10 pr-3 py-2.5 rounded-lg border border-brand-border bg-brand-bg text-brand-text focus:outline-none focus:ring-2 focus:ring-brand-primary/30 text-sm font-medium transition"
-                    />
-                  </div>
-                </div>
+              <div className="space-y-1">
+                <Label htmlFor="loginPassword" className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                  Password
+                </Label>
+                <Input
+                  id="loginPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="border-0 border-b-2 rounded-none p-2 h-auto shadow-none focus-visible:ring-0 focus-visible:border-primary transition-colors"
+                  required
+                />
               </div>
-            )}
-
-            <button
-              type="submit"
-              className="w-full py-3 mt-2 flex items-center justify-center gap-2 rounded-lg bg-brand-primary text-white font-semibold hover:bg-brand-secondary transition duration-300 cursor-pointer text-sm shadow-md shadow-brand-primary/10"
-            >
-              <span>{isRegister ? 'Continue to Plans' : 'Sign In'}</span>
-              {isRegister ? <ArrowRight className="w-4 h-4" /> : null}
-            </button>
-          </form>
-        )}
-
-        {isRegister && step === 2 && (
-          <form onSubmit={handleAuthSubmit} className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {PLANS_CATALOG.map((plan) => {
-                const PlanIcon = plan.icon;
-                const isSelected = selectedPlanCode === plan.code;
-
-                return (
-                  <div
-                    key={plan.code}
-                    onClick={() => setSelectedPlanCode(plan.code)}
-                    className={`relative flex flex-col justify-between p-6 rounded-xl border-2 bg-brand-card cursor-pointer transition-all duration-300 ${isSelected
-                      ? 'border-brand-primary shadow-lg shadow-brand-primary/5 -translate-y-1'
-                      : 'border-brand-border hover:border-zinc-300 dark:hover:border-zinc-700'
-                      }`}
-                  >
-                    {/* Selected Badge */}
-                    {isSelected && (
-                      <div className="absolute -top-3 right-4 bg-brand-primary text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                        <CheckCircle2 className="w-3 h-3" />
-                        Selected
-                      </div>
-                    )}
-
-                    <div>
-                      {/* Icon & Title */}
-                      <div className="flex items-center gap-3 mb-4">
-                        <div className={`w-10 h-10 rounded-lg bg-linear-to-tr ${plan.color} text-white flex items-center justify-center shadow`}>
-                          <PlanIcon className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h3 className="font-heading font-extrabold text-sm">{plan.name}</h3>
-                          <span className="text-xs text-zinc-400">{plan.code === 'enterprise_custom_v1' ? 'Enterprise' : 'Subscription'}</span>
-                        </div>
-                      </div>
-
-                      {/* Price */}
-                      <div className="mb-4">
-                        <span className="text-3xl font-black">{plan.price}</span>
-                        {plan.price !== 'Custom' && <span className="text-xs text-zinc-400"> / month</span>}
-                      </div>
-
-                      <p className="text-xs text-zinc-500 mb-6 leading-relaxed">
-                        {plan.description}
-                      </p>
-
-                      {/* Limits Specifications */}
-                      <div className="flex flex-col gap-2.5 text-xs border-t border-brand-border pt-4 text-zinc-600 dark:text-zinc-300">
-                        <div className="flex justify-between">
-                          <span>Team Seats</span>
-                          <span className="font-bold">{plan.seatsLimit} Seats</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Active MAU Limit</span>
-                          <span className="font-bold">{plan.mauLimit.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Max Guides/Flows</span>
-                          <span className="font-bold">{plan.flowLimit} Active</span>
-                        </div>
-                        <div className="flex justify-between items-center mt-1">
-                          <span>Analytics Portal</span>
-                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${plan.features.analytics_dashboard ? 'bg-emerald-500/10 text-emerald-600' : 'bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-500'}`}>
-                            {plan.features.analytics_dashboard ? 'Included' : 'None'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Back and Confirm Controls */}
-            <div className="flex gap-4 border-t border-brand-border pt-6 mt-2">
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                disabled={isLoading}
-                className="px-5 py-3 rounded-lg border border-brand-border hover:bg-brand-bg text-sm font-semibold text-zinc-700 dark:text-zinc-300 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
-              </button>
-
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="flex-1 py-3 rounded-lg bg-brand-primary text-white font-semibold hover:bg-brand-secondary transition duration-300 cursor-pointer text-sm shadow-md shadow-brand-primary/10 flex items-center justify-center gap-2 disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4.5 h-4.5" />
-                    <span>Complete Signup & Create Workspace</span>
-                  </>
-                )}
-              </button>
-            </div>
-
-          </form>
-        )}
-
-        {/* Bottom Navigation Toggle */}
-        {(!isRegister || step === 1) && (
-          <div className="mt-6 text-center text-xs text-zinc-500">
-            <span>{isRegister ? 'Already have an account?' : 'Don\'t have an account?'} </span>
-            <button
-              type="button"
-              onClick={() => setIsRegister(!isRegister)}
-              className="text-brand-primary font-semibold hover:underline cursor-pointer bg-transparent border-0 p-0"
-            >
-              {isRegister ? 'Sign In' : 'Create Account'}
-            </button>
+              <div className="pt-4 flex items-center justify-between">
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  className="p-0 cursor-pointer h-auto text-primary font-medium text-base gap-2 hover:bg-transparent hover:underline"
+                >
+                  Sign In
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setIsRegister(true)}
+                  className="text-sm cursor-pointer text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Create account
+                </button>
+              </div>
+            </form>
           </div>
         )}
 
-      </div>
+        {/* Register Step 1 */}
+        {isRegister && step === 1 && (
+          <div className="max-w-sm w-full mx-auto">
+            <h2 className="text-4xl font-light tracking-tight mb-6">Create your workspace</h2>
+            <form onSubmit={handleProceedToPlans} className="space-y-4">
+              <div className="space-y-1">
+                <Label htmlFor="fullName" className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                  Full Name
+                </Label>
+                <Input
+                  id="fullName"
+                  type="text"
+                  placeholder="John Doe"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="border-0 border-b-2 rounded-none p-2 h-auto shadow-none focus-visible:ring-0 focus-visible:border-primary transition-colors"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="companyName" className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                  Company / Organisation
+                </Label>
+                <Input
+                  id="companyName"
+                  type="text"
+                  placeholder="Acme Inc."
+                  value={companyName}
+                  onChange={(e) => setCompanyName(e.target.value)}
+                  className="border-0 border-b-2 rounded-none p-2 h-auto shadow-none focus-visible:ring-0 focus-visible:border-primary transition-colors"
+                  required
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="regEmail" className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                  Email Address
+                </Label>
+                <Input
+                  id="regEmail"
+                  type="email"
+                  placeholder="name@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="border-0 border-b-2 rounded-none p-2 h-auto shadow-none focus-visible:ring-0 focus-visible:border-primary transition-colors"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="password" className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Password
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="border-0 border-b-2 rounded-none p-2 h-auto shadow-none focus-visible:ring-0 focus-visible:border-primary transition-colors"
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="confirmPassword" className="text-xs uppercase tracking-wider text-muted-foreground font-medium">
+                    Confirm Password
+                  </Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="border-0 border-b-2 rounded-none p-2 h-auto shadow-none focus-visible:ring-0 focus-visible:border-primary transition-colors"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="pt-4 flex items-center justify-between">
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  className="p-0 h-auto cursor-pointer text-primary font-medium text-base gap-2 hover:bg-transparent hover:underline"
+                >
+                  Continue to Plans
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => setIsRegister(false)}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                >
+                  Sign in instead
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+        {/* Register Step 2 */}
+        {isRegister && step === 2 && (
+          <div className="w-full h-full flex flex-col">
+            <div className="mb-6">
+              <h2 className="text-3xl md:text-4xl font-light tracking-tight">Choose your plan</h2>
+              <p className="text-muted-foreground text-lg">Select the plan that fits your needs. You can always change later.</p>
+            </div>
+            <form onSubmit={handleAuthSubmit} className="flex-1 flex flex-col">
+              <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {PLANS_CATALOG.map((plan) => {
+                  const PlanIcon = plan.icon;
+                  const isSelected = selectedPlanCode === plan.code;
+                  return (
+                    <div
+                      key={plan.code}
+                      onClick={() => setSelectedPlanCode(plan.code)}
+                      className={cn(
+                        'relative cursor-pointer p-6 transition-all duration-200 flex flex-col',
+                        'border-2 rounded-xl hover:border-primary/50',
+                        isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border'
+                      )}
+                    >
+                      {isSelected && (
+                        <Badge className="absolute -top-2 right-4 bg-primary text-primary-foreground text-xs uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Selected
+                        </Badge>
+                      )}
+                      <div className="flex items-center gap-3 mb-4">
+                        <div
+                          className={cn(
+                            'w-12 h-12 rounded-xl bg-gradient-to-tr text-white flex items-center justify-center shadow-md',
+                            plan.color
+                          )}
+                        >
+                          <PlanIcon className="h-6 w-6" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg">{plan.name}</h3>
+                          <span className="text-xs text-muted-foreground">
+                            {plan.code === 'enterprise_custom_v1' ? 'Enterprise' : 'Subscription'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-3xl font-bold">{plan.price}</span>
+                        {plan.price !== 'Custom' && <span className="text-sm text-muted-foreground"> / month</span>}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{plan.description}</p>
+                      <div className="mt-auto space-y-2 text-sm pt-3 border-t border-border/50">
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Team Seats</span>
+                          <span className="font-medium">{plan.seatsLimit} Seats</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">MAU Limit</span>
+                          <span className="font-medium">{plan.mauLimit.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-muted-foreground">Max Guides/Flows</span>
+                          <span className="font-medium">{plan.flowLimit} Active</span>
+                        </div>
+                        <div className="flex justify-between items-center pt-1">
+                          <span className="text-muted-foreground">Analytics Portal</span>
+                          <Badge
+                            variant={plan.features.analytics_dashboard ? 'default' : 'outline'}
+                            className="text-[10px]"
+                          >
+                            {plan.features.analytics_dashboard ? 'Included' : 'None'}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
 
+              <div className="flex items-center justify-between pt-4 border-t border-border/50">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setStep(1)}
+                  disabled={isLoading}
+                  className="p-0 h-auto text-muted-foreground font-medium text-base gap-2 hover:bg-transparent hover:text-primary"
+                >
+                  <ArrowLeft className="h-5 w-5" />
+                  Back
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isLoading}
+                  variant="ghost"
+                  className="p-0 h-auto text-primary font-medium text-base gap-2 hover:bg-transparent hover:underline"
+                >
+                  {isLoading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      Creating...
+                    </div>
+                  ) : (
+                    <>
+                      Complete Signup
+                      <ArrowRight className="h-5 w-5" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

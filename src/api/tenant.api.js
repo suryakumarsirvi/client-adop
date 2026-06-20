@@ -1,6 +1,5 @@
 export const createTenant = async ({ fullName, companyName, email, password, planCode }) => {
 
-  console.log(password, "type of password:" + typeof password);
   const response = await fetch('http://localhost:3000/api/v1/tenants', {
     method: 'POST',
     headers: {

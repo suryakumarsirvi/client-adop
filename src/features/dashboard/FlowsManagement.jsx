@@ -1,86 +1,170 @@
 import { HasPermission } from '@/components/auth/HasPermission';
 import { toast } from 'sonner';
+import { useState } from 'react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Search,
+  Plus,
+  Pencil,
+  Trash2,
+  Copy,
+} from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function FlowsManagement() {
+  const [searchTerm, setSearchTerm] = useState('');
+
   const dummyFlows = [
     { id: 1, name: 'Onboarding Tour v1', steps: 5, status: 'Active' },
     { id: 2, name: 'Feature Callout - Billing Settings', steps: 2, status: 'Draft' },
     { id: 3, name: 'Hotspot Integration - Help Desk', steps: 1, status: 'Active' },
+    { id: 4, name: 'User Profile Walkthrough', steps: 4, status: 'Archived' },
   ];
 
+  // Filter flows based on search
+  const filteredFlows = dummyFlows.filter(flow =>
+    flow.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const getStatusBadge = (status) => {
+    const variants = {
+      Active: { variant: 'default', label: 'Active' },
+      Draft: { variant: 'secondary', label: 'Draft' },
+      Archived: { variant: 'destructive', label: 'Archived' },
+    };
+    const config = variants[status] || { variant: 'outline', label: status };
+    return <Badge variant={config.variant}>{config.label}</Badge>;
+  };
+
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8">
+      {/* Header with Search and Create */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight">Flows Management</h1>
-          <p className="text-zinc-500 text-sm">Create and target widgets across client applications.</p>
+          <h1 className="text-3xl font-light tracking-tight">Flows Management</h1>
+          <p className="text-muted-foreground text-sm">Create and target widgets across client applications.</p>
         </div>
-        
+
         <HasPermission
           perform="flow:create"
           fallback={
-            <button
-              onClick={() => toast.error('You do not have flow:create permission!')}
-              className="px-4 py-2 bg-zinc-200 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 rounded-lg text-sm font-semibold cursor-not-allowed border border-brand-border"
+            <Button
+              variant="outline"
+              disabled
+              className="cursor-not-allowed opacity-60"
             >
+              <Plus className="mr-2 h-4 w-4" />
               Create Flow (Restricted)
-            </button>
+            </Button>
           }
         >
-          <button
-            onClick={() => toast.success('Starting Flow Editor wizard...')}
-            className="px-4 py-2 bg-brand-primary text-white rounded-lg text-sm font-semibold hover:opacity-90 transition cursor-pointer shadow-md"
-          >
-            + Create New Flow
-          </button>
+          <Button onClick={() => toast.success('Starting Flow Editor wizard...')}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create New Flow
+          </Button>
         </HasPermission>
       </div>
 
-      <div className="bg-brand-card rounded-xl border border-brand-border overflow-hidden shadow-sm">
-        <table className="w-full text-left border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-brand-border bg-brand-bg text-zinc-500 font-semibold">
-              <th className="p-4">Flow Name</th>
-              <th className="p-4">Total Steps</th>
-              <th className="p-4">Status</th>
-              <th className="p-4 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {dummyFlows.map((flow) => (
-              <tr key={flow.id} className="border-b border-brand-border hover:bg-brand-bg/50 transition">
-                <td className="p-4 font-bold">{flow.name}</td>
-                <td className="p-4 text-zinc-500">{flow.steps} steps</td>
-                <td className="p-4">
-                  <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                    flow.status === 'Active' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'
-                  }`}>
-                    {flow.status}
-                  </span>
-                </td>
-                <td className="p-4 text-right flex gap-2 justify-end">
-                  <HasPermission perform="flow:edit">
-                    <button
-                      onClick={() => toast.success(`Editing flow: ${flow.name}`)}
-                      className="px-3 py-1 rounded border border-brand-border hover:bg-brand-bg transition text-xs font-semibold cursor-pointer"
-                    >
-                      Edit
-                    </button>
-                  </HasPermission>
+      {/* Search Bar */}
+      <div className="relative max-w-sm">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search flows..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-9"
+        />
+      </div>
 
-                  <HasPermission perform="flow:delete">
-                    <button
-                      onClick={() => toast.success(`Deleted flow: ${flow.name}`)}
-                      className="px-3 py-1 rounded bg-red-500/10 text-red-600 hover:bg-red-500/20 transition text-xs font-semibold cursor-pointer"
-                    >
-                      Delete
-                    </button>
-                  </HasPermission>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Flows Table */}
+      <Card className="border shadow-sm">
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/30 hover:bg-muted/30">
+                <TableHead className="w-[45%] font-semibold text-xs uppercase tracking-wider text-muted-foreground">
+                  Flow Name
+                </TableHead>
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">
+                  Total Steps
+                </TableHead>
+                <TableHead className="font-semibold text-xs uppercase tracking-wider text-muted-foreground">
+                  Status
+                </TableHead>
+                <TableHead className="text-right font-semibold text-xs uppercase tracking-wider text-muted-foreground">
+                  Actions
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredFlows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                    No flows found matching your search.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredFlows.map((flow) => (
+                  <TableRow key={flow.id} className="hover:bg-muted/20 transition-colors">
+                    <TableCell className="font-medium">{flow.name}</TableCell>
+                    <TableCell>{flow.steps} steps</TableCell>
+                    <TableCell>{getStatusBadge(flow.status)}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <HasPermission perform="flow:edit">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => toast.success(`Editing flow: ${flow.name}`)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                        </HasPermission>
+
+                        <HasPermission perform="flow:delete">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={() => toast.success(`Deleted flow: ${flow.name}`)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </HasPermission>
+
+                        {/* Extra action: Duplicate (always visible for demo) */}
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => toast.info(`Duplicating flow: ${flow.name}`)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Footer Info */}
+      <div className="text-xs text-muted-foreground">
+        Showing {filteredFlows.length} of {dummyFlows.length} flows
       </div>
     </div>
   );

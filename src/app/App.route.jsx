@@ -15,6 +15,7 @@ import FlowsManagement from '@/features/dashboard/FlowsManagement';
 import BrandingSettings from '@/features/dashboard/BrandingSettings';
 import Forbidden from '@/components/errors/Forbidden';
 import RouterErrorFallback from '@/errors/router.error';
+import CreateApiKey from '@/features/dashboard/CreateApiKey';
 
 const isSubdomainActive = !!getSubdomain();
 
@@ -61,6 +62,15 @@ export const router = createBrowserRouter([
           {
             path: 'settings',
             element: <BrandingSettings />,
+          },
+        ],
+      },
+      {
+        element: <PermissionGuard requiredPermission="settings:write" fallbackPath="/forbidden" />,
+        children: [
+          {
+            path: 'api',
+            element: <CreateApiKey />,
           },
         ],
       },
