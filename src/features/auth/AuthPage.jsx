@@ -185,26 +185,26 @@ export default function AuthPage() {
         <div className="space-y-6 flex justify-between">
           <div>
             <a href="mailto:hello@webtour.dev" className="text-muted-foreground hover:text-primary transition-colors text-lg">
-              hello@webtour.dev
+              hello@webtour.com
             </a>
             <div className="flex gap-4 mt-2">
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <i className="h-5 w-5 ri-facebook-circle-fill"></i>
+                <i className="h-10 w-10 ri-facebook-circle-fill"></i>
               </a>
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <i className="h-5 w-5 ri-instagram-fill"></i>
+                <i className="h-10 w-10 ri-instagram-fill"></i>
               </a>
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <i className="h-5 w-5 ri-behance-fill"></i>
+                <i className="h-10 w-10 ri-behance-fill"></i>
               </a>
               <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <i className="h-5 w-5 ri-linkedin-box-fill"></i>
+                <i className="h-10 w-10 ri-linkedin-box-fill"></i>
               </a>
             </div>
           </div>
           <div className="text-sm text-muted-foreground space-y-1">
-            <p>San Francisco, CA</p>
-            <p>+1 (555) 123-4567</p>
+            <p>Mumbai, India</p>
+            <p>+91 99999 12345</p>
           </div>
         </div>
       </div>}

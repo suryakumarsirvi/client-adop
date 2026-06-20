@@ -7,7 +7,7 @@ const Navbar = ({mode,toggleMode}) => {
     const navigate = useNavigate();
     
     return (
-        <nav className="sticky top-0 z-50 md:mx-24 mx-6 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <nav className="sticky top-2 z-50 md:mx-24 mx-6 backdrop-blur rounded-full px-6 supports-[backdrop-filter]:bg-background/60">
             <div className="container flex h-16 items-center justify-between">
                 <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
                     <div className="w-9 h-9">
